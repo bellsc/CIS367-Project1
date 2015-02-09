@@ -1,9 +1,19 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include "TruncCone.h"
+#include "Ring.h"
 
 using glm::vec3;
-void TruncCone::build(float topRad, short circ_pts) {
+
+Ring::~Ring() {
+    if (glIsBuffer(vertex_buffer))
+        glDeleteBuffers(1, &vertex_buffer);
+    if (glIsBuffer(color_buffer))
+        glDeleteBuffers(1, &color_buffer);
+    if (glIsBuffer(index_buffer))
+        glDeleteBuffers(1, &index_buffer);
+}
+
+void Ring::build(float innerRad, short circ_pts) {
 
     glGenBuffers(1, &vertex_buffer);
     glGenBuffers(1, &index_buffer);
@@ -11,54 +21,76 @@ void TruncCone::build(float topRad, short circ_pts) {
 
     circ_points = circ_pts;
 
-    float z = -HEIGHT/2;
     float angle = 0;
+    float z = HEIGHT/2;
 
-    //Lower Circle
+    //Upper, inner circle
     for (int i=0; i < circ_points; i++){
-        vec3 v1{BOT_RAD * cos(angle), BOT_RAD * sin(angle), z};
-        cout << "(x: " << v1.x << ", y: " << v1.y << ")" << endl;
+        vec3 v1{innerRad * cos(angle), innerRad * sin(angle), z};
+        all_points.push_back(v1);
+        all_colors.push_back(vec3 {1,0,0});
+        angle += 2 * M_PI/circ_points;
+    }
+
+    //Upper, outer circle
+    for (int i=0; i < circ_points; i++){
+        vec3 v1{OUTER_RAD * cos(angle), OUTER_RAD * sin(angle), z};
+        all_points.push_back(v1);
+        all_colors.push_back(vec3 {0,1,.5});
+        angle += 2 * M_PI/circ_points;
+    }
+
+    z = -HEIGHT/2;
+    //Lower, inner circle
+    for (int i=0; i < circ_points; i++){
+        vec3 v1{innerRad * cos(angle), innerRad * sin(angle), z};
         cout<<"index: " << all_points.size() << endl;
         all_points.push_back(v1);
-        all_colors.push_back(vec3 {0,1,0});
+        all_colors.push_back(vec3 {1,0,0});
         angle += 2 * M_PI/circ_points;
     }
 
-    z = HEIGHT/2;
-    //Upper Circle
+    //Lower, outer circle
     for (int i=0; i < circ_points; i++){
-        vec3 v1{topRad * cos(angle), topRad * sin(angle), z};
+        vec3 v1{OUTER_RAD * cos(angle), OUTER_RAD * sin(angle), z};
         all_points.push_back(v1);
+        all_colors.push_back(vec3 {0,1,.5});
         angle += 2 * M_PI/circ_points;
-        all_colors.push_back(vec3 {0,1,0});
     }
 
-    //Center of bottom
-    all_points.push_back(vec3 {0,0,-HEIGHT/2});
-    all_colors.push_back(vec3 {0,1,0});
-    //Center of top
-    all_points.push_back(vec3 {0,0,HEIGHT/2});
-    all_colors.push_back(vec3 {0,1,0});
 
-    //Quads for the sides
-    for( int k = 0; k < circ_points; k++){
-        all_index.push_back(k);
-        all_index.push_back(k+circ_points);
+    //Top indices
+    for(int i = 0; i < circ_points; i++){
+        all_index.push_back(i);
+        all_index.push_back(i+circ_points);
     }
     all_index.push_back(0);
     all_index.push_back(circ_points);
 
-    //Bottom triangle fan
+
+    //Bottom indices
+    for(int i = 2*circ_points; i < 3 * circ_points; i++){
+        all_index.push_back(i);
+        all_index.push_back(i+circ_points);
+    }
     all_index.push_back(2*circ_points);
-    for (int i = 0; i < circ_points; i++)
-        all_index.push_back(i);
-    all_index.push_back(0);
+    all_index.push_back(3*circ_points);
 
-    //Top triangle fan
-    all_index.push_back(2*circ_points+1);
-    for (int i = circ_points; i < 2*circ_points; i++)
+    //Inner Quads
+    for(int i = 0; i < circ_points; i++){
         all_index.push_back(i);
+        all_index.push_back(i+2*circ_points);
+    }
+    all_index.push_back(0);
+    all_index.push_back(2*circ_points);
+
+    //Outer Quads
+    for(int i = circ_points; i < 2 * circ_points; i++){
+        all_index.push_back(i);
+        all_index.push_back(i+2*circ_points);
+    }
     all_index.push_back(circ_points);
+    all_index.push_back(3*circ_points);
 
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -98,7 +130,7 @@ void TruncCone::build(float topRad, short circ_pts) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void TruncCone::render(bool outline) const {
+void Ring::render(bool outline) const {
     /* bind vertex buffer */
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -113,19 +145,21 @@ void TruncCone::render(bool outline) const {
     glPolygonMode (GL_BACK, GL_LINE);
 
     int n =  circ_points * 2 + 2;
-    glFrontFace(GL_CW);
+    glFrontFace(GL_CCW);
     glDrawElements(GL_QUAD_STRIP, n, GL_UNSIGNED_SHORT, 0);
 
     glFrontFace(GL_CW);
-    glDrawElements(GL_TRIANGLE_FAN, circ_points+2, GL_UNSIGNED_SHORT,
+    glDrawElements(GL_QUAD_STRIP, n, GL_UNSIGNED_SHORT,
             (void *) ((sizeof(GLushort) * (n))));
 
-    n += circ_points+2;
+    glDrawElements(GL_QUAD_STRIP, n, GL_UNSIGNED_SHORT,
+            (void *) ((sizeof(GLushort) * (2*n))));
+
     glFrontFace(GL_CCW);
-    glDrawElements(GL_TRIANGLE_FAN, circ_points+2, GL_UNSIGNED_SHORT,
-            (void *) ((sizeof(GLushort) * (n))));
+    glDrawElements(GL_QUAD_STRIP, n, GL_UNSIGNED_SHORT,
+            (void *) ((sizeof(GLushort) * (3*n))));
 
-      /* unbind the buffers */
+    /* unbind the buffers */
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

@@ -18,9 +18,10 @@
 #include <glm/gtx/io.hpp>
 #include "Sphere.h"
 #include "HexNut.h"
-#include "UnitDisk.h"
-#include "UnitCube.h"
+//#include "UnitCube.h"
 #include "TruncCone.h"
+//#include "Ring.h"
+#include "TvStand.h"
 #undef GLFW_DLL
 #include <GLFW/glfw3.h>
 
@@ -28,9 +29,10 @@ using namespace std;
 
 Sphere one;
 HexNut two;
-UnitDisk three;
 UnitCube four;
 TruncCone cone;
+Ring ring;
+TvStand tvStand;
 void init_model();
 void win_refresh(GLFWwindow*);
 float arc_ball_rad_square;
@@ -80,7 +82,7 @@ void win_refresh (GLFWwindow *win) {
 
     const float& S = one.radius();
     /* draw the axes */
-/*
+
     glBegin(GL_LINES);
     glColor3ub (255, 0, 0);
     glVertex2i (0, 0);
@@ -122,67 +124,10 @@ void win_refresh (GLFWwindow *win) {
     glEnd();
 
 
-    //TEST
-/*
-
-    glBegin(GL_TRIANGLES);           // Begin drawing the pyramid with 4 triangles
-    // Front
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f( 0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(1.0f, -1.0f, 1.0f);
-
-    // Right
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(1.0f, -1.0f, -1.0f);
-
-    // Back
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-
-    // Left
-    glColor3f(1.0f,0.0f,0.0f);       // Red
-    glVertex3f( 0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f,0.0f,1.0f);       // Blue
-    glVertex3f(-1.0f,-1.0f,-1.0f);
-    glColor3f(0.0f,1.0f,0.0f);       // Green
-    glVertex3f(-1.0f,-1.0f, 1.0f);
-
-
-    glEnd();   // Done drawing the pyramid
-
-    glBegin(GL_QUADS);
-    //Bottom
-
-    glColor3f(0.0f,0.0f,1.0f);       // Blue
-    glVertex3f(-1.0f,-1.0f,-1.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-
-    glEnd();
-*/
-    //END TEST
-
-
-
     glPushMatrix();
-    glRotatef(90, 1, 0, 0);
-    glTranslatef(-3, -2, 1);
-    glMultMatrixf(glm::value_ptr(floor_cf));
+   // glRotatef(90, 1, 0, 0);
+    //glTranslatef(-3, -2, 1);
+    //glMultMatrixf(glm::value_ptr(floor_cf));
    // four.render(false);  /* true: super impose the polygon outline */
     glPopMatrix();
 
@@ -190,7 +135,19 @@ void win_refresh (GLFWwindow *win) {
     glPushMatrix();
    // glRotatef(-90,1,0,0);
 
-    cone.render(false);
+   // cone.render(false);
+    glPopMatrix();
+
+    glPushMatrix();
+    // glRotatef(-90,1,0,0);
+
+   // ring.render(false);
+    glPopMatrix();
+
+    glPushMatrix();
+    // glRotatef(-90,1,0,0);
+
+    tvStand.render(false);
     glPopMatrix();
 /*
     glPushMatrix();
@@ -325,9 +282,10 @@ void make_model() {
     int N = 0;
     one.build ((void *)&N);
     two.build(nullptr);
-    three.build(nullptr);
-    four.build(nullptr);
-    cone.build(1, .5, 10);
+    four.build();
+    //cone.build(1, .5, 10);
+    ring.build(.5, 12);
+    tvStand.build();
 
     hex1_cf = glm::rotate(30.0f, glm::vec3{0, 1, 0});   /* rotate 30 degs around Y-axis */
     floor_cf = glm::scale(glm::vec3{6,4,.2});
