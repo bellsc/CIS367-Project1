@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <time.h>
 #include "Ring.h"
 
 using glm::vec3;
@@ -13,13 +14,16 @@ Ring::~Ring() {
         glDeleteBuffers(1, &index_buffer);
 }
 
-void Ring::build(float innerRad, short circ_pts) {
+void Ring::build(float innerRad, short circ_pts, glm::vec3 color, short variation) {
 
     glGenBuffers(1, &vertex_buffer);
     glGenBuffers(1, &index_buffer);
     glGenBuffers(1, &color_buffer);
 
     circ_points = circ_pts;
+
+    //Set up light and dark color variations
+    srand (time(NULL));
 
     float angle = 0;
     float z = HEIGHT/2;
@@ -28,7 +32,8 @@ void Ring::build(float innerRad, short circ_pts) {
     for (int i=0; i < circ_points; i++){
         vec3 v1{innerRad * cos(angle), innerRad * sin(angle), z};
         all_points.push_back(v1);
-        all_colors.push_back(vec3 {1,0,0});
+        vec3 darkColor{color.x-(rand()%variation+ C_ADJUST)/100.0, color.y-(rand()%variation+ C_ADJUST)/100.0, color.z-(rand()%variation+ C_ADJUST)/100.0};
+        all_colors.push_back(darkColor);
         angle += 2 * M_PI/circ_points;
     }
 
@@ -36,7 +41,8 @@ void Ring::build(float innerRad, short circ_pts) {
     for (int i=0; i < circ_points; i++){
         vec3 v1{OUTER_RAD * cos(angle), OUTER_RAD * sin(angle), z};
         all_points.push_back(v1);
-        all_colors.push_back(vec3 {0,1,.5});
+        vec3 lightColor{color.x+(rand()%variation+ C_ADJUST)/100.0, color.y+(rand()%variation+ C_ADJUST)/100.0, color.z+(rand()%variation+ C_ADJUST)/100.0};
+        all_colors.push_back(lightColor);
         angle += 2 * M_PI/circ_points;
     }
 
@@ -44,9 +50,9 @@ void Ring::build(float innerRad, short circ_pts) {
     //Lower, inner circle
     for (int i=0; i < circ_points; i++){
         vec3 v1{innerRad * cos(angle), innerRad * sin(angle), z};
-        cout<<"index: " << all_points.size() << endl;
         all_points.push_back(v1);
-        all_colors.push_back(vec3 {1,0,0});
+        vec3 darkColor{color.x-(rand()%variation+ C_ADJUST)/100.0, color.y-(rand()%variation+ C_ADJUST)/100.0, color.z-(rand()%variation+ C_ADJUST)/100.0};
+        all_colors.push_back(darkColor);
         angle += 2 * M_PI/circ_points;
     }
 
@@ -54,7 +60,10 @@ void Ring::build(float innerRad, short circ_pts) {
     for (int i=0; i < circ_points; i++){
         vec3 v1{OUTER_RAD * cos(angle), OUTER_RAD * sin(angle), z};
         all_points.push_back(v1);
-        all_colors.push_back(vec3 {0,1,.5});
+        vec3 normColor{color.x-variation/200.0+(rand()%variation)/100.0,
+                color.y-variation/200.0-(rand()%variation)/100.0,
+                color.z-variation/200.0-(rand()%variation)/100.0};
+        all_colors.push_back(normColor);
         angle += 2 * M_PI/circ_points;
     }
 
@@ -140,8 +149,11 @@ void Ring::render(bool outline) const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
 
     /* render the polygon */
+    if(outline)
+        glPolygonMode(GL_FRONT, GL_LINE);
+    else
+        glPolygonMode (GL_FRONT, GL_FILL);
 
-    glPolygonMode (GL_FRONT, GL_FILL);
     glPolygonMode (GL_BACK, GL_LINE);
 
     int n =  circ_points * 2 + 2;

@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 #include <glm/glm.hpp>
+
+#pragma once
 using namespace std;
 
 class Ring{
@@ -12,6 +14,7 @@ class Ring{
 private:
     const float HEIGHT = 1.0f;
     const float OUTER_RAD = 1.0f;
+    const short C_ADJUST = 10;
     short circ_points = 3;
 
 protected:
@@ -21,7 +24,7 @@ protected:
 
 public:
     ~Ring();
-    void build(float innerRad, short circ_points);
+    void build(float innerRad, short circ_points, glm::vec3 color, short variation);
     void render(bool) const;
 
 };

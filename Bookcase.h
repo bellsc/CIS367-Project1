@@ -13,16 +13,15 @@
 
 using namespace std;
 
-class TvStand{
+class Bookcase{
 
 private:
-    Ring frame, handle;
-    UnitCube divider, door;
-    glm::mat4 frame_cf, handle_cf, divider_cf, door_cf;
+    UnitCube base;
+    Ring section;
 
 public:
-    ~TvStand();
+    ~Bookcase();
     void build();
-    void render(bool) const;
+    void render(bool outline, short numSections) const;
 
 };

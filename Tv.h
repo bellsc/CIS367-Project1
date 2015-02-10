@@ -8,20 +8,22 @@
 
 #include "UnitCube.h"
 #include "Ring.h"
+#include "TruncCone.h"
 
 #pragma once
 
 using namespace std;
 
-class TvStand{
+class Tv{
 
 private:
-    Ring frame, handle;
-    UnitCube divider, door;
-    glm::mat4 frame_cf, handle_cf, divider_cf, door_cf;
+    Ring frame;
+    UnitCube screen, backing;
+    TruncCone base, stem;
+    glm::mat4 frame_cf, screen_cf, base_cf, stem_cf;
 
 public:
-    ~TvStand();
+    ~Tv();
     void build();
     void render(bool) const;
 

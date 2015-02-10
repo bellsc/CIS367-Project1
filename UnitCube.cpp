@@ -1,13 +1,18 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <time.h>
 #include "UnitCube.h"
 
 using glm::vec3;
-void UnitCube::build() {
+void UnitCube::build(glm::vec3 color, short variation) {
 
     glGenBuffers(1, &vertex_buffer);
     glGenBuffers(1, &index_buffer);
     glGenBuffers(1, &color_buffer);
+
+    //Set up light and dark color variations
+    srand (time(NULL));
+
 
     float x, y, z;
     x = y = z = SIDE_LENGTH / 2;
@@ -20,7 +25,8 @@ void UnitCube::build() {
 
     for (int i = 0; i < 4; i++) {
         all_index.push_back(i);
-        all_colors.push_back(vec3 {0, 0, 1});
+        vec3 darkColor{color.x-(rand()%variation+ C_ADJUST)/100.0, color.y-(rand()%variation+ C_ADJUST)/100.0, color.z-(rand()%variation+ C_ADJUST)/100.0};
+        all_colors.push_back(darkColor);
     }
 
     //top
@@ -31,7 +37,10 @@ void UnitCube::build() {
 
     for (int i = 0; i < 4; i++) {
         all_index.push_back(i+4);
-        all_colors.push_back(vec3 {1, 0, 0});
+        vec3 normColor{color.x-variation/200.0+(rand()%variation)/100.0,
+                color.y-variation/200.0-(rand()%variation)/100.0,
+                color.z-variation/200.0-(rand()%variation)/100.0};
+        all_colors.push_back(normColor);
     }
 
     //Sides
@@ -96,7 +105,10 @@ void UnitCube::render(bool outline) const {
 
 
     /* render the polygon */
-    glPolygonMode (GL_FRONT, GL_FILL);
+    if(outline)
+        glPolygonMode(GL_FRONT, GL_LINE);
+    else
+        glPolygonMode (GL_FRONT, GL_FILL);
     glPolygonMode (GL_BACK, GL_LINE);
     glFrontFace(GL_CW);
     glDrawRangeElements(GL_QUADS, 0,0, 4, GL_UNSIGNED_SHORT, 0);

@@ -1,9 +1,10 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <time.h>
 #include "TruncCone.h"
 
 using glm::vec3;
-void TruncCone::build(float topRad, short circ_pts) {
+void TruncCone::build(float topRad, short circ_pts, glm::vec3 color, short variation) {
 
     glGenBuffers(1, &vertex_buffer);
     glGenBuffers(1, &index_buffer);
@@ -11,16 +12,21 @@ void TruncCone::build(float topRad, short circ_pts) {
 
     circ_points = circ_pts;
 
+    //Set up light and dark color variations
+    srand (time(NULL));
+
+
     float z = -HEIGHT/2;
     float angle = 0;
 
     //Lower Circle
     for (int i=0; i < circ_points; i++){
         vec3 v1{BOT_RAD * cos(angle), BOT_RAD * sin(angle), z};
-        cout << "(x: " << v1.x << ", y: " << v1.y << ")" << endl;
-        cout<<"index: " << all_points.size() << endl;
         all_points.push_back(v1);
-        all_colors.push_back(vec3 {0,1,0});
+        vec3 normColor{color.x-variation/200.0+(rand()%variation)/100.0,
+                color.y-variation/200.0-(rand()%variation)/100.0,
+                color.z-variation/200.0-(rand()%variation)/100.0};
+        all_colors.push_back(normColor);
         angle += 2 * M_PI/circ_points;
     }
 
@@ -30,15 +36,20 @@ void TruncCone::build(float topRad, short circ_pts) {
         vec3 v1{topRad * cos(angle), topRad * sin(angle), z};
         all_points.push_back(v1);
         angle += 2 * M_PI/circ_points;
-        all_colors.push_back(vec3 {0,1,0});
+        vec3 lightColor{color.x+(rand()%variation+ C_ADJUST)/100.0, color.y+(rand()%variation+ C_ADJUST)/100.0, color.z+(rand()%variation+ C_ADJUST)/100.0};
+        all_colors.push_back(lightColor);
     }
 
     //Center of bottom
     all_points.push_back(vec3 {0,0,-HEIGHT/2});
-    all_colors.push_back(vec3 {0,1,0});
+    vec3 darkColor{color.x-(rand()%variation+ C_ADJUST)/100.0, color.y-(rand()%variation+ C_ADJUST)/100.0, color.z-(rand()%variation+ C_ADJUST)/100.0};
+    all_colors.push_back(darkColor);
     //Center of top
     all_points.push_back(vec3 {0,0,HEIGHT/2});
-    all_colors.push_back(vec3 {0,1,0});
+    vec3 normColor{color.x-variation/200.0+(rand()%variation)/100.0,
+            color.y-variation/200.0-(rand()%variation)/100.0,
+            color.z-variation/200.0-(rand()%variation)/100.0};
+    all_colors.push_back(normColor);
 
     //Quads for the sides
     for( int k = 0; k < circ_points; k++){
@@ -109,7 +120,10 @@ void TruncCone::render(bool outline) const {
 
     /* render the polygon */
 
-    glPolygonMode (GL_FRONT, GL_FILL);
+    if(outline)
+        glPolygonMode(GL_FRONT, GL_LINE);
+    else
+        glPolygonMode (GL_FRONT, GL_FILL);
     glPolygonMode (GL_BACK, GL_LINE);
 
     int n =  circ_points * 2 + 2;

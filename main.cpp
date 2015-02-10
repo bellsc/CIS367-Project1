@@ -18,10 +18,10 @@
 #include <glm/gtx/io.hpp>
 #include "Sphere.h"
 #include "HexNut.h"
-//#include "UnitCube.h"
-#include "TruncCone.h"
-//#include "Ring.h"
 #include "TvStand.h"
+#include "Tv.h"
+#include "Bookcase.h"
+
 #undef GLFW_DLL
 #include <GLFW/glfw3.h>
 
@@ -30,9 +30,10 @@ using namespace std;
 Sphere one;
 HexNut two;
 UnitCube four;
-TruncCone cone;
 Ring ring;
 TvStand tvStand;
+Tv tv;
+Bookcase bookcase;
 void init_model();
 void win_refresh(GLFWwindow*);
 float arc_ball_rad_square;
@@ -66,7 +67,7 @@ void win_resize (GLFWwindow * win, int width, int height)
 
     /* near-plane(1) & far-plane(10) are always POSITIVE and they measure
      * the distances along the Z-axis in front of the camera */
-    gluPerspective(60.0, static_cast<float> (width)/ static_cast<float> (height), 1, 10);
+    gluPerspective(60.0, static_cast<float> (width)/ static_cast<float> (height), 1, 30);
 }
 
 void win_refresh (GLFWwindow *win) {
@@ -97,7 +98,7 @@ void win_refresh (GLFWwindow *win) {
 
     /* The following two groups of GL_LINE_LOOP and GL_LINES draw the square block
      * whose 4 vertices make the tetrahedron */
-
+/*
     glColor3ub (255, 200, 0);
     glBegin(GL_LINE_LOOP);
     glVertex3f(S, S, S);
@@ -123,7 +124,7 @@ void win_refresh (GLFWwindow *win) {
     glVertex3f(S, -S, -S);
     glEnd();
 
-
+*/
     glPushMatrix();
    // glRotatef(90, 1, 0, 0);
     //glTranslatef(-3, -2, 1);
@@ -132,23 +133,28 @@ void win_refresh (GLFWwindow *win) {
     glPopMatrix();
 
 
-    glPushMatrix();
-   // glRotatef(-90,1,0,0);
-
-   // cone.render(false);
-    glPopMatrix();
-
+    //Tv
     glPushMatrix();
     // glRotatef(-90,1,0,0);
-
-   // ring.render(false);
+    tv.render(false);
     glPopMatrix();
 
+    //tvStand
     glPushMatrix();
-    // glRotatef(-90,1,0,0);
-
+    glTranslatef(0,-1.912,0);
+    glScalef(1.1,1,1);
     tvStand.render(false);
     glPopMatrix();
+
+    //Bookcase
+    glPushMatrix();
+    glTranslatef(3.3,-2.8,0);
+    glScalef(1.7,1.3,1);
+    bookcase.render(false, 4);
+    glPopMatrix();
+
+
+
 /*
     glPushMatrix();
     glTranslatef(S, S, -S);
@@ -282,10 +288,12 @@ void make_model() {
     int N = 0;
     one.build ((void *)&N);
     two.build(nullptr);
-    four.build();
+    //four.build();
     //cone.build(1, .5, 10);
-    ring.build(.5, 12);
+    //ring.build(.5, 12);
     tvStand.build();
+    tv.build();
+    bookcase.build();
 
     hex1_cf = glm::rotate(30.0f, glm::vec3{0, 1, 0});   /* rotate 30 degs around Y-axis */
     floor_cf = glm::scale(glm::vec3{6,4,.2});
@@ -302,7 +310,7 @@ int main() {
     glfwSetErrorCallback(err_function);
     GLFWwindow * win;
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    win = glfwCreateWindow(100, 50, "Test", NULL, NULL);
+    win = glfwCreateWindow(100, 50, "Entertainment Center", NULL, NULL);
     if (!win) {
         cerr << "Can't create window" << endl;
         exit (EXIT_FAILURE);
