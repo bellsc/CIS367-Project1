@@ -4,6 +4,15 @@
 #include "UnitCube.h"
 
 using glm::vec3;
+UnitCube::~UnitCube() {
+    if (glIsBuffer(vertex_buffer))
+        glDeleteBuffers(1, &vertex_buffer);
+    if (glIsBuffer(color_buffer))
+        glDeleteBuffers(1, &color_buffer);
+    if (glIsBuffer(index_buffer))
+        glDeleteBuffers(1, &index_buffer);
+}
+
 void UnitCube::build(glm::vec3 color, short variation) {
 
     glGenBuffers(1, &vertex_buffer);

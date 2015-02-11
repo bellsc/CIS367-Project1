@@ -9,21 +9,23 @@
 #pragma once
 using namespace std;
 
+class Cartridge{
 
-class TruncCone {
 private:
-    const float HEIGHT = 1.0f;
-    const float BOT_RAD = 1.0f;
-    short C_ADJUST = 10;
-    short circ_points = 3;
+    const float HEIGHT = .75f * .45f;
+    const float WIDTH = 1.3f * .45f;
+    const float DEPTH = .2f * .5f;
+    const short C_ADJUST = 10;
+    short circ_points = 7;
 
 protected:
     GLuint vertex_buffer, color_buffer, index_buffer;
     std::vector <glm::vec3> all_points, all_colors;
     vector<GLushort> all_index;
+
 public:
-    ~TruncCone();
-    void build(float topRad, short circ_points, glm::vec3 color, short variation);
+    ~Cartridge();
+    void build(short circ_points, glm::vec3 color, short variation);
     void render(bool) const;
 
 };

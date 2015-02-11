@@ -6,21 +6,23 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+#include "Ring.h"
+
 #pragma once
+
 using namespace std;
 
+class Cd{
 
-class UnitCube {
 private:
-    const float SIDE_LENGTH = 1.0f;
-    short C_ADJUST = 10;
+    const float HEIGHT = 0.02;
+    const float SCALE = .35;
+    const float IN_RAD = 0.2;
+    Ring inner, outerTop, outerBottom;
 
-protected:
-    GLuint vertex_buffer, color_buffer, index_buffer;
-    std::vector <glm::vec3> all_points, all_colors;
-    vector<GLushort> all_index;
+
 public:
-    ~UnitCube();
+    ~Cd();
     void build(glm::vec3 color, short variation);
     void render(bool) const;
 

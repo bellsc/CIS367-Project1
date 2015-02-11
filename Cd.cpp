@@ -2,24 +2,45 @@
 #include <cmath>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Tv.h"
+#include "Cd.h"
 
 using glm::vec3;
 
-Tv::~Tv() {
+Cd::~Cd() {
 
 }
 
-void Tv::build() {
-    frame.build(.9, 4, glm::vec3{.2,.2,.2}, 4);
-    screen.build(glm::vec3{.1,0,.6}, 4);
-    backing.build(glm::vec3{.2,.2,.2}, 2);
-    base.build(.2, 15, glm::vec3{.3,.3,.3}, 2);
-    stem.build(.95, 15, glm::vec3{.3,.3,.3}, 2);
+void Cd::build(glm::vec3 color, short variation) {
+
+    inner.build(.5, 15, glm::vec3{.8,.8,.8}, 2);
+    outerTop.build(IN_RAD, 25, color, variation);
+    outerBottom.build(IN_RAD, 25, glm::vec3{.5,.5,.5}, 15);
+
 }
 
-void Tv::render(bool outline) const {
+void Cd::render(bool outline) const {
 
+    //Inner ring
+    glPushMatrix();
+    glScalef(SCALE/5, SCALE/5, HEIGHT);
+    inner.render(outline);
+    glPopMatrix();
+
+    //Outer, top ring
+    glPushMatrix();
+    glTranslatef(0,0,HEIGHT/2);
+    glScalef(SCALE,SCALE, HEIGHT);
+    outerTop.render(outline);
+    glPopMatrix();
+
+    //Outer, bottom ring
+    glPushMatrix();
+    glTranslatef(0,0,-HEIGHT/2);
+    glScalef(SCALE,SCALE, HEIGHT);
+    outerBottom.render(outline);
+    glPopMatrix();
+
+    /*
     //Main frame
     glPushMatrix();
     glTranslatef(0,1.8,.12);
@@ -47,7 +68,7 @@ void Tv::render(bool outline) const {
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(0,1.62,-.2);
+    glTranslatef(0,1.6,-.2);
     glScalef(3.1, 2.3, .3);
     //glRotatef(180,1,0,0);
     backing.render(outline);
@@ -56,7 +77,7 @@ void Tv::render(bool outline) const {
 
     //Base
     glPushMatrix();
-   // glTranslatef(0,-.05,0);
+    // glTranslatef(0,-.05,0);
     glScalef(1.3, .15, .4);
     glRotatef(-90,1,0,0);
     base.render(outline);
@@ -69,7 +90,7 @@ void Tv::render(bool outline) const {
     glRotatef(-90,1,0,0);
     stem.render(outline);
     glPopMatrix();
-
+*/
 }
 
 

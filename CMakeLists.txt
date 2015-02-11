@@ -25,7 +25,7 @@ if (APPLE)
   find_library(COREVID_LIBRARY CoreVideo REQUIRED)
 endif (APPLE)
 
-set(SOURCE_FILES main.cpp Sphere.cpp HexNut.cpp UnitCube.cpp TruncCone.cpp Ring.cpp TvStand.cpp Tv.cpp Bookcase.cpp)
+set(SOURCE_FILES main.cpp UnitCube.cpp TruncCone.cpp Ring.cpp TvStand.cpp Tv.cpp Bookcase.cpp Cartridge.cpp Cd.cpp)
 add_executable(Entertainment_Center ${SOURCE_FILES})
   target_link_libraries (Entertainment_Center ${GLFW3_LIBRARY} ${OPENGL_LIBRARIES} ${COCOA_LIBRARY}
      ${COREVID_LIBRARY} ${IOKIT_LIBRARY} ${GLEW_LIBRARY})

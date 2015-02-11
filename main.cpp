@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <time.h>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -16,24 +17,32 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/io.hpp>
-#include "Sphere.h"
-#include "HexNut.h"
 #include "TvStand.h"
 #include "Tv.h"
 #include "Bookcase.h"
+#include "Cartridge.h"
+#include "Cd.h"
 
 #undef GLFW_DLL
 #include <GLFW/glfw3.h>
 
 using namespace std;
 
-Sphere one;
-HexNut two;
-UnitCube four;
+const int CD_RADIUS = 4;
+
 Ring ring;
 TvStand tvStand;
 Tv tv;
 Bookcase bookcase;
+Cartridge grayCart, blackCart, redCart, yellowCart;
+UnitCube redGame, greenGame, whiteGame, blackGame;
+UnitCube wii, clck, xbox;
+Cd cd;
+vector<Cd>  cds;
+vector<pair<GLushort,glm::vec3>> cdRandRotations;
+
+bool show_lines = false;
+
 void init_model();
 void win_refresh(GLFWwindow*);
 float arc_ball_rad_square;
@@ -81,9 +90,9 @@ void win_refresh (GLFWwindow *win) {
     /* place the camera using the camera coordinate frame */
     glMultMatrixf (glm::value_ptr(camera_cf));
 
-    const float& S = one.radius();
+    const float& S = 2;
     /* draw the axes */
-
+/*
     glBegin(GL_LINES);
     glColor3ub (255, 0, 0);
     glVertex2i (0, 0);
@@ -135,33 +144,182 @@ void win_refresh (GLFWwindow *win) {
 
     //Tv
     glPushMatrix();
+    glScalef(1.2,.9,1);
     // glRotatef(-90,1,0,0);
-    tv.render(false);
+    tv.render(show_lines);
     glPopMatrix();
 
     //tvStand
     glPushMatrix();
     glTranslatef(0,-1.912,0);
-    glScalef(1.1,1,1);
-    tvStand.render(false);
+    glScalef(1.2,1,1);
+    tvStand.render(show_lines);
     glPopMatrix();
 
     //Bookcase
     glPushMatrix();
-    glTranslatef(3.3,-2.8,0);
+    glTranslatef(3.6,-2.8,0);
     glScalef(1.7,1.3,1);
-    bookcase.render(false, 4);
+    bookcase.render(show_lines, 4);
+    glPopMatrix();
+
+    //Cartridge
+    glPushMatrix();
+    glTranslatef(3.8,-1.94,.1);
+    glRotatef(90,0,1,0);
+    grayCart.render(show_lines);
+    glTranslatef(-.05,0,.1);
+    grayCart.render(show_lines);
+    glTranslatef(.05,0,.1);
+    blackCart.render(show_lines);
+    glTranslatef(0,0,.1);
+    redCart.render(show_lines);
+    glTranslatef(-.08,0,.1);
+    grayCart.render(show_lines);
+    glTranslatef(0,0,.1);
+    yellowCart.render(show_lines);
+    glPopMatrix();
+
+    //Bottom shelf cartridge
+    glPushMatrix();
+    glTranslatef(3.6,-3.35,0);
+   // glTranslatef(0,0,1);
+    glRotatef(-90,1,0,0);
+    glRotatef(-20,0,0,1);
+
+    //glScalef(1.7,1.3,1);
+    grayCart.render(show_lines);
+    glPopMatrix();
+
+    //Game cases on shelf
+    glPushMatrix();
+    glRotatef(-20,0,0,1);
+    glTranslatef(.64,-.90,0);
+    glScalef(.08,1.08,.8);
+
+    short gameMove = 0;
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    whiteGame.render(show_lines);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    blackGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    whiteGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    greenGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    redGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    blackGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    redGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    greenGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    whiteGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove++,0,0);
+    blackGame.render(show_lines);
+    glPopMatrix();
+
+    glTranslatef(0,.03,0);
+    glPushMatrix();
+    glTranslatef(gameMove,0,0);
+    redGame.render(show_lines);
+    glPopMatrix();
+
+    glPopMatrix();
+
+    //Game in cabinet
+    glPushMatrix();
+    glTranslatef(.65,-3.35,0);
+    glScalef(1.08,.08,.8);
+    whiteGame.render(show_lines);
+    glPopMatrix();
+
+    //wii
+    glPushMatrix();
+    glTranslatef(3.35,-2,.1);
+    glScalef(.7,.24,1.02);
+    wii.render(show_lines);
+    glPopMatrix();
+
+    //xbox
+    glPushMatrix();
+    glTranslatef(3.6,-.63,.2);
+    glScalef(1.3,.4,.8);
+    xbox.render(show_lines);
+    glPopMatrix();
+
+    //clock
+    glPushMatrix();
+    glTranslatef(3.6,.59,.2);
+    glScalef(1.4,.3,.8);
+    xbox.render(show_lines);
+    glPopMatrix();
+
+    //CDs on shelf
+    glPushMatrix();
+    glTranslatef(-.6,-1.53,0);
+    glRotatef(90,1,0,0);
+    cds[4].render(show_lines);
+
+    glTranslatef(.03,.04,-.05);
+    cds[0].render(show_lines);
+
+    glTranslatef(.05,.06,-.05);
+    cds[1].render(show_lines);
     glPopMatrix();
 
 
+
+    //Floating CDs
+    for(float i = 0; i < 10; i++){
+        glPushMatrix();
+        glTranslatef(-3.5,3.8 - i*.9,-1.2);
+        glRotatef(cdRandRotations[i].first, cdRandRotations[i].second.x,
+                cdRandRotations[i].second.y,
+                cdRandRotations[i].second.z);
+        cds[(int)i%5].render(show_lines);
+        glPopMatrix();
+    }
 
 /*
-    glPushMatrix();
-    glTranslatef(S, S, -S);
-    glRotatef(-45, 1, 0, 0);
-
-    two.render(false);
-    glPopMatrix();
 
     glPushMatrix();
     glTranslatef(-S, S, S);
@@ -199,6 +357,9 @@ void key_handler (GLFWwindow *win, int key, int scan_code, int action, int mods)
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(win, true);
                 break;
+            case GLFW_KEY_L:
+                show_lines = !show_lines;
+                break;
             case GLFW_KEY_0:
             case GLFW_KEY_1:
             case GLFW_KEY_2:
@@ -208,7 +369,8 @@ void key_handler (GLFWwindow *win, int key, int scan_code, int action, int mods)
             case GLFW_KEY_6:
                 /* rebuild the model at different level of detail */
                 int N = key - GLFW_KEY_0;
-                one.build((void *)&N);
+                grayCart.build(15, glm::vec3{.0,.0,.5}, 5);
+                //one.build((void *)&N);
                 break;
         }
     }
@@ -285,22 +447,58 @@ void init_gl() {
 }
 
 void make_model() {
-    int N = 0;
-    one.build ((void *)&N);
-    two.build(nullptr);
     //four.build();
     //cone.build(1, .5, 10);
     //ring.build(.5, 12);
+    grayCart.build(11, glm::vec3{.5, .5, .5}, 5);
+    redCart.build(11, glm::vec3{.9, 0, .1}, 5);
+    blackCart.build(11, glm::vec3{.1, .1, .1}, 5);
+    yellowCart.build(11, glm::vec3{.9, .9, 0}, 5);
     tvStand.build();
     tv.build();
     bookcase.build();
+    cd.build(glm::vec3{0, 0, .8}, 7);
+
+    redGame.build(glm::vec3{.7,0,0}, 8);
+    greenGame.build(glm::vec3{0,.7,0}, 8);
+    whiteGame.build(glm::vec3{.7,.7,.7}, 8);
+    blackGame.build(glm::vec3{.2,.2,.2}, 8);
+
+    wii.build(glm::vec3{.2,.2,.2}, 5);
+    clck.build(glm::vec3{.5,.5,.5}, 6);
+    xbox.build(glm::vec3{.32,.32,.32}, 4);
+
+
+    //different colors of cds
+    vector<glm::vec3> cdColors;
+
+    cdColors.push_back(glm::vec3{.8, 0, 0});
+    cdColors.push_back(glm::vec3{.8, .8, 0});
+    cdColors.push_back(glm::vec3{0, .8, 0});
+    cdColors.push_back(glm::vec3{0, .8, .8});
+    cdColors.push_back(glm::vec3{0, 0, .8});
+
+
+    //Randomly fill array
+    //srand(time(NULL));
+    for (int i = 0; i < 5; i++) {
+        cds.push_back(Cd{});
+    }
+    for (int i = 0; i < 5; i++) {
+
+        cds[i].build(cdColors[i], 7);
+    }
+
+    for(int i = 0; i < 10; i++)
+        cdRandRotations.push_back(make_pair(rand()%360, glm::vec3{rand()%2,rand()%2,rand()%2}));
+
 
     hex1_cf = glm::rotate(30.0f, glm::vec3{0, 1, 0});   /* rotate 30 degs around Y-axis */
     floor_cf = glm::scale(glm::vec3{6,4,.2});
 }
 
 int main() {
-
+    srand(time(NULL));
     if(!glfwInit()) {
         cerr << "Can't initialize GLFW" << endl;
         glfwTerminate();
