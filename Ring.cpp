@@ -22,7 +22,6 @@ void Ring::build(float innerRad, short circ_pts, glm::vec3 color, short variatio
 
     circ_points = circ_pts;
 
-    //Set up light and dark color variations
     srand (time(NULL));
 
     float angle = 0;

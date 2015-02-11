@@ -54,7 +54,6 @@ void Cartridge::build(short circ_pts, glm::vec3 color, short variation) {
         angle += M_PI/(circ_points-1);
     }
 
-   //y = HEIGHT/2;
     //center for front fan
     all_points.push_back(vec3{0, HEIGHT/2, z});
     vec3 lightColor{color.x+(rand()%variation+ C_ADJUST)/100.0, color.y+(rand()%variation+ C_ADJUST)/100.0, color.z+(rand()%variation+ C_ADJUST)/100.0};

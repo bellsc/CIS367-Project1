@@ -20,10 +20,8 @@ private:
     const float IN_RAD = 0.2;
     Ring inner, outerTop, outerBottom;
 
-
 public:
     ~Cd();
     void build(glm::vec3 color, short variation);
     void render(bool) const;
-
 };

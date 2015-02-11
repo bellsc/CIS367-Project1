@@ -20,7 +20,6 @@ private:
     Ring frame;
     UnitCube screen, backing;
     TruncCone base, stem;
-    glm::mat4 frame_cf, screen_cf, base_cf, stem_cf;
 
 public:
     ~Tv();

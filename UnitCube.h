@@ -9,8 +9,8 @@
 #pragma once
 using namespace std;
 
-
 class UnitCube {
+
 private:
     const float SIDE_LENGTH = 1.0f;
     short C_ADJUST = 10;

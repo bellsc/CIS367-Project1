@@ -23,9 +23,7 @@ void TruncCone::build(float topRad, short circ_pts, glm::vec3 color, short varia
 
     circ_points = circ_pts;
 
-    //Set up light and dark color variations
     srand (time(NULL));
-
 
     float z = -HEIGHT/2;
     float angle = 0;
@@ -81,7 +79,6 @@ void TruncCone::build(float topRad, short circ_pts, glm::vec3 color, short varia
     for (int i = circ_points; i < 2*circ_points; i++)
         all_index.push_back(i);
     all_index.push_back(circ_points);
-
 
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, all_points.size() * sizeof(float) * 3, NULL, GL_DYNAMIC_DRAW);

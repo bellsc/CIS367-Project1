@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <cmath>
 #include <algorithm>
@@ -28,9 +29,6 @@
 
 using namespace std;
 
-const int CD_RADIUS = 4;
-
-Ring ring;
 TvStand tvStand;
 Tv tv;
 Bookcase bookcase;
@@ -38,7 +36,7 @@ Cartridge grayCart, blackCart, redCart, yellowCart;
 UnitCube redGame, greenGame, whiteGame, blackGame;
 UnitCube wii, clck, xbox;
 Cd cd;
-vector<Cd>  cds;
+vector<Cd> cds;
 vector<pair<GLushort,glm::vec3>> cdRandRotations;
 
 bool show_lines = false;
@@ -49,8 +47,10 @@ float arc_ball_rad_square;
 int screen_ctr_x, screen_ctr_y;
 
 glm::mat4 camera_cf; // {glm::translate(glm::mat4(1.0f), glm::vec3{0,0,-5})};
-glm::mat4 hex1_cf;
-glm::mat4 floor_cf;
+glm::mat4 tv_cf, stand_cf, cartridge_cf, game_cf, topCd_cf, topGame_cf;
+vector<glm::mat4*> cfs;
+short cf_index = 0;
+
 
 void err_function (int what, const char *msg) {
     cerr << what << " " << msg << endl;
@@ -59,9 +59,6 @@ void err_function (int what, const char *msg) {
 
 void win_resize (GLFWwindow * win, int width, int height)
 {
-#ifdef DEBUG
-    cout << __FUNCTION__ << " " << width << "x" << height << endl;
-#endif
     int w, h;
     glfwGetWindowSize(win, &w, &h);
     screen_ctr_x = w / 2.0;
@@ -80,9 +77,7 @@ void win_resize (GLFWwindow * win, int width, int height)
 }
 
 void win_refresh (GLFWwindow *win) {
-//    cout << __PRETTY_FUNCTION__ << endl;
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    //glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode (GL_MODELVIEW);
@@ -90,7 +85,7 @@ void win_refresh (GLFWwindow *win) {
     /* place the camera using the camera coordinate frame */
     glMultMatrixf (glm::value_ptr(camera_cf));
 
-    const float& S = 2;
+
     /* draw the axes */
 /*
     glBegin(GL_LINES);
@@ -105,47 +100,10 @@ void win_refresh (GLFWwindow *win) {
     glVertex3f (0, 0, S * 1.1);
     glEnd();
 
-    /* The following two groups of GL_LINE_LOOP and GL_LINES draw the square block
-     * whose 4 vertices make the tetrahedron */
-/*
-    glColor3ub (255, 200, 0);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(S, S, S);
-    glVertex3f(-S, S, S);
-    glVertex3f(-S, -S, S);
-    glVertex3f(S, -S, S);
-    glEnd();
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(S, S, -S);
-    glVertex3f(-S, S, -S);
-    glVertex3f(-S, -S, -S);
-    glVertex3f(S, -S, -S);
-    glEnd();
-
-    glBegin(GL_LINES);
-    glVertex3f(S, S, S);
-    glVertex3f(S, S, -S);
-    glVertex3f(-S, S, S);
-    glVertex3f(-S, S, -S);
-    glVertex3f(-S, -S, S);
-    glVertex3f(-S, -S, -S);
-    glVertex3f(S, -S, S);
-    glVertex3f(S, -S, -S);
-    glEnd();
-
 */
-    glPushMatrix();
-   // glRotatef(90, 1, 0, 0);
-    //glTranslatef(-3, -2, 1);
-    //glMultMatrixf(glm::value_ptr(floor_cf));
-   // four.render(false);  /* true: super impose the polygon outline */
-    glPopMatrix();
-
-
     //Tv
     glPushMatrix();
-    glScalef(1.2,.9,1);
-    // glRotatef(-90,1,0,0);
+    glMultMatrixf(glm::value_ptr(tv_cf));
     tv.render(show_lines);
     glPopMatrix();
 
@@ -153,6 +111,7 @@ void win_refresh (GLFWwindow *win) {
     glPushMatrix();
     glTranslatef(0,-1.912,0);
     glScalef(1.2,1,1);
+    glMultMatrixf(glm::value_ptr(stand_cf));
     tvStand.render(show_lines);
     glPopMatrix();
 
@@ -183,11 +142,9 @@ void win_refresh (GLFWwindow *win) {
     //Bottom shelf cartridge
     glPushMatrix();
     glTranslatef(3.6,-3.35,0);
-   // glTranslatef(0,0,1);
+    glMultMatrixf(glm::value_ptr(cartridge_cf));
     glRotatef(-90,1,0,0);
     glRotatef(-20,0,0,1);
-
-    //glScalef(1.7,1.3,1);
     grayCart.render(show_lines);
     glPopMatrix();
 
@@ -268,8 +225,17 @@ void win_refresh (GLFWwindow *win) {
     //Game in cabinet
     glPushMatrix();
     glTranslatef(.65,-3.35,0);
+    glMultMatrixf(glm::value_ptr(game_cf));
     glScalef(1.08,.08,.8);
-    whiteGame.render(show_lines);
+    redGame.render(show_lines);
+    glPopMatrix();
+
+    //Game on bookshelf
+    glPushMatrix();
+    glTranslatef(3.4,1.7,.15);
+    glMultMatrixf(glm::value_ptr(topGame_cf));
+    glScalef(.8,.08,1.08);
+    greenGame.render(show_lines);
     glPopMatrix();
 
     //wii
@@ -285,12 +251,22 @@ void win_refresh (GLFWwindow *win) {
     glScalef(1.3,.4,.8);
     xbox.render(show_lines);
     glPopMatrix();
+    glPushMatrix();
+    glTranslatef(3.4,-.57,.60);
+    glScalef(.6,.1,.02);
+    whiteGame.render(show_lines);
+    glPopMatrix();
 
     //clock
     glPushMatrix();
     glTranslatef(3.6,.59,.2);
     glScalef(1.4,.3,.8);
     xbox.render(show_lines);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(3.64,.57,.60);
+    glScalef(1.3,.15,.02);
+    blackGame.render(show_lines);
     glPopMatrix();
 
     //CDs on shelf
@@ -301,12 +277,14 @@ void win_refresh (GLFWwindow *win) {
 
     glTranslatef(.03,.04,-.05);
     cds[0].render(show_lines);
+    glPopMatrix();
+    glPushMatrix();
 
-    glTranslatef(.05,.06,-.05);
+    glTranslatef(-.52,-1.43,.1);
+    glMultMatrixf(glm::value_ptr(topCd_cf));
+    glRotatef(90,1,0,0);
     cds[1].render(show_lines);
     glPopMatrix();
-
-
 
     //Floating CDs
     for(float i = 0; i < 10; i++){
@@ -319,14 +297,6 @@ void win_refresh (GLFWwindow *win) {
         glPopMatrix();
     }
 
-/*
-
-    glPushMatrix();
-    glTranslatef(-S, S, S);
-    glMultMatrixf(glm::value_ptr(hex1_cf));
-    two.render(false);
-    glPopMatrix();
-*/
     /* must swap buffer at the end of render function */
     glfwSwapBuffers(win);
 }
@@ -334,43 +304,105 @@ void win_refresh (GLFWwindow *win) {
 /* action: GLFW_PRESS, GLFW_RELEASE, or GLFW_REPEAT */
 void key_handler (GLFWwindow *win, int key, int scan_code, int action, int mods)
 {
-    cout << __FUNCTION__ << endl;
     if (action != GLFW_PRESS) return;
-    if (mods == GLFW_MOD_SHIFT) {
-        switch (key) {
-            case GLFW_KEY_D: /* Uppercase 'D' */
-                /* pre mult: trans  Z-ax of the world */
-                hex1_cf = glm::translate(glm::vec3{0, +0.5f, 0}) * hex1_cf;
-                break;
-        }
-    }
+
     else {
+        glm::mat4 reset;
         switch (key) {
-            case GLFW_KEY_D: /* lowercase 'd' */
-                /* pre mult: trans  Z-ax of the world */
-                hex1_cf = glm::translate(glm::vec3{0, -0.5f, 0}) * hex1_cf;
+
+            //Select current CF
+            case GLFW_KEY_LEFT:
+                if(--cf_index == -1)
+                    cf_index = cfs.size()-1;
+                cout << cf_index << endl;
                 break;
-            case GLFW_KEY_MINUS:
-                /* post mult: rotate around Z-ax of the hex nut */
-                hex1_cf = hex1_cf * glm::rotate(1.0f, glm::vec3{0, 0, 1});
+            case GLFW_KEY_RIGHT:
+                if(++cf_index == cfs.size())
+                    cf_index = 0;
+                cout << cf_index << endl;
                 break;
+
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(win, true);
                 break;
+
+                //Show lines
             case GLFW_KEY_L:
                 show_lines = !show_lines;
                 break;
-            case GLFW_KEY_0:
-            case GLFW_KEY_1:
-            case GLFW_KEY_2:
-            case GLFW_KEY_3:
-            case GLFW_KEY_4:
-            case GLFW_KEY_5:
-            case GLFW_KEY_6:
-                /* rebuild the model at different level of detail */
-                int N = key - GLFW_KEY_0;
-                grayCart.build(15, glm::vec3{.0,.0,.5}, 5);
-                //one.build((void *)&N);
+
+                //Translate
+            case GLFW_KEY_W:    //up
+                *cfs[cf_index] = glm::translate(glm::vec3{0, 0.1, 0}) * *cfs[cf_index];
+                break;
+                //Rotate
+            case GLFW_KEY_A:    //left
+                *cfs[cf_index] = glm::translate(glm::vec3{-0.1, 0, 0}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_S:    //down
+                *cfs[cf_index] = glm::translate(glm::vec3{0, -0.1, 0}) * *cfs[cf_index];
+                break;
+                //Rotate
+            case GLFW_KEY_D:    //right
+                *cfs[cf_index] = glm::translate(glm::vec3{0.1, 0, 0}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_Z:    //back
+                *cfs[cf_index] = glm::translate(glm::vec3{0, 0, -0.1}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_X:    //forth
+                *cfs[cf_index] = glm::translate(glm::vec3{0, 0, 0.1}) * *cfs[cf_index];
+                break;
+
+            //Rotate
+            case GLFW_KEY_T:    //pos x axis
+                *cfs[cf_index] = glm::rotate((float)M_PI/8, glm::vec3{1, 0, 0}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_Y:    //pos y axis
+                *cfs[cf_index] = glm::rotate((float)M_PI/8, glm::vec3{0, 1, 0}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_U:    //pos z axis
+                *cfs[cf_index] = glm::rotate((float)M_PI/8, glm::vec3{0, 0, 1}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_G:    //neg x axis
+                *cfs[cf_index] = glm::rotate((float)-M_PI/8, glm::vec3{1, 0, 0}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_H:    //neg y axis
+                *cfs[cf_index] = glm::rotate((float)-M_PI/8, glm::vec3{0, 1, 0}) * *cfs[cf_index];
+                break;
+            case GLFW_KEY_J:    //neg z axis
+                *cfs[cf_index] = glm::rotate((float)-M_PI/8, glm::vec3{0, 0, 1}) * *cfs[cf_index];
+                break;
+
+                //scale
+            case GLFW_KEY_N:    //smaller
+                *cfs[cf_index] = glm::scale(*cfs[cf_index],glm::vec3{0.9, 0.9, 0.9});
+                break;
+            case GLFW_KEY_M:    //bigger
+                *cfs[cf_index] = glm::scale(*cfs[cf_index],glm::vec3{1.1, 1.1, 1.1});
+                break;
+
+
+                //camera presets
+            case GLFW_KEY_1:    //default
+                camera_cf = reset;
+                camera_cf *= glm::translate(glm::vec3{0, 0, -8});
+                break;
+            case GLFW_KEY_2:    //behind looking down
+                camera_cf = reset;
+                camera_cf = glm::rotate((float)M_PI, glm::vec3{0, 1, 0}) * camera_cf;
+                camera_cf = camera_cf * glm::translate(glm::vec3{0, -6, 10}) ;
+                camera_cf = glm::rotate((float)M_PI/5, glm::vec3{1, 0, 0}) * camera_cf;
+                break;
+            case GLFW_KEY_3:    //looking at bookcase
+                camera_cf = reset;
+               // camera_cf = glm::rotate((float)M_PI, glm::vec3{0, 1, 0}) * camera_cf;
+                camera_cf = camera_cf * glm::translate(glm::vec3{-3.5, -1, -4}) ;
+                camera_cf = glm::rotate((float)M_PI/5, glm::vec3{1, 0, 0}) * camera_cf;
+                break;
+            case GLFW_KEY_4:    //looking from CD side
+                camera_cf = reset;
+                camera_cf = camera_cf * glm::translate(glm::vec3{8, 0, -2}) ;
+                camera_cf = glm::rotate((float)M_PI/3, glm::vec3{0, 1, 0}) * camera_cf;
                 break;
         }
     }
@@ -389,7 +421,6 @@ void cursor_handler (GLFWwindow *win, double xpos, double ypos) {
 
     glm::vec3 this_vec;
     if (state == GLFW_PRESS) {
-        /* TODO: use glUnproject? */
         float x = (xpos - screen_ctr_x);
         float y = -(ypos - screen_ctr_y);
         float hypot_square = x * x + y * y;
@@ -443,13 +474,10 @@ void init_gl() {
     glLineWidth(3.0);
 
     /* place the camera at Z=+5 (notice that the sign is OPPOSITE!) */
-    camera_cf *= glm::translate(glm::vec3{0, 0, -5});
+    camera_cf *= glm::translate(glm::vec3{0, 0, -8});
 }
 
 void make_model() {
-    //four.build();
-    //cone.build(1, .5, 10);
-    //ring.build(.5, 12);
     grayCart.build(11, glm::vec3{.5, .5, .5}, 5);
     redCart.build(11, glm::vec3{.9, 0, .1}, 5);
     blackCart.build(11, glm::vec3{.1, .1, .1}, 5);
@@ -459,8 +487,8 @@ void make_model() {
     bookcase.build();
     cd.build(glm::vec3{0, 0, .8}, 7);
 
-    redGame.build(glm::vec3{.7,0,0}, 8);
-    greenGame.build(glm::vec3{0,.7,0}, 8);
+    redGame.build(glm::vec3{.7,.2,.2}, 8);
+    greenGame.build(glm::vec3{.2,.7,.2}, 8);
     whiteGame.build(glm::vec3{.7,.7,.7}, 8);
     blackGame.build(glm::vec3{.2,.2,.2}, 8);
 
@@ -468,37 +496,36 @@ void make_model() {
     clck.build(glm::vec3{.5,.5,.5}, 6);
     xbox.build(glm::vec3{.32,.32,.32}, 4);
 
-
     //different colors of cds
     vector<glm::vec3> cdColors;
-
     cdColors.push_back(glm::vec3{.8, 0, 0});
     cdColors.push_back(glm::vec3{.8, .8, 0});
     cdColors.push_back(glm::vec3{0, .8, 0});
     cdColors.push_back(glm::vec3{0, .8, .8});
     cdColors.push_back(glm::vec3{0, 0, .8});
 
-
-    //Randomly fill array
-    //srand(time(NULL));
     for (int i = 0; i < 5; i++) {
         cds.push_back(Cd{});
     }
     for (int i = 0; i < 5; i++) {
-
         cds[i].build(cdColors[i], 7);
     }
 
     for(int i = 0; i < 10; i++)
         cdRandRotations.push_back(make_pair(rand()%360, glm::vec3{rand()%2,rand()%2,rand()%2}));
 
-
-    hex1_cf = glm::rotate(30.0f, glm::vec3{0, 1, 0});   /* rotate 30 degs around Y-axis */
-    floor_cf = glm::scale(glm::vec3{6,4,.2});
+    tv_cf = glm::scale(tv_cf, glm::vec3{1.2,.9,1});
 }
 
 int main() {
     srand(time(NULL));
+    cfs.push_back(&tv_cf);
+    cfs.push_back(&stand_cf);
+    cfs.push_back(&cartridge_cf);
+    cfs.push_back(&game_cf);
+    cfs.push_back(&topCd_cf);
+    cfs.push_back(&topGame_cf);
+
     if(!glfwInit()) {
         cerr << "Can't initialize GLFW" << endl;
         glfwTerminate();

@@ -112,7 +112,6 @@ void UnitCube::render(bool outline) const {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
 
-
     /* render the polygon */
     if(outline)
         glPolygonMode(GL_FRONT, GL_LINE);
